@@ -386,3 +386,8 @@ TOOLS_RUN_FDESIGN = Action(
 TOOLS_MORE_TO_COME = Action(
     label='More to come',
 )
+TOOLS_RUN_TASK_UI = Action(
+    label='Open the task definition UI with the variables from the current flow graph',
+    tooltip='Execute task_frontend',
+    stock_id=gtk.STOCK_EXECUTE,
+)

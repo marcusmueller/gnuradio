@@ -110,6 +110,7 @@ MENU_BAR_LIST = (
     ]),
     (gtk.Action('Tools', '_Tools', None, None), [
         Actions.TOOLS_RUN_FDESIGN,
+        Actions.TOOLS_RUN_TASK_UI,
         None,
         Actions.TOOLS_MORE_TO_COME,
     ]),

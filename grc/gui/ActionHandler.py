@@ -118,7 +118,8 @@ class ActionHandler:
                 Actions.TYPES_WINDOW_DISPLAY, Actions.TOGGLE_BLOCKS_WINDOW,
                 Actions.TOGGLE_REPORTS_WINDOW, Actions.TOGGLE_HIDE_DISABLED_BLOCKS,
                 Actions.TOOLS_RUN_FDESIGN, Actions.TOGGLE_SCROLL_LOCK, Actions.CLEAR_REPORTS,
-                Actions.TOGGLE_AUTO_HIDE_PORT_LABELS
+                Actions.TOGGLE_AUTO_HIDE_PORT_LABELS,
+                Actions.TOOLS_RUN_TASK_UI
             ): action.set_sensitive(True)
             if ParseXML.xml_failures:
                 Messages.send_xml_errors_if_any(ParseXML.xml_failures)
@@ -519,6 +520,12 @@ class ActionHandler:
 
         elif action == Actions.TOOLS_RUN_FDESIGN:
             subprocess.Popen('gr_filter_design',
+                             shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        elif action == Actions.TOOLS_RUN_TASK_UI:
+            print "starting task frontend"
+            if not self.get_page().get_saved() or not self.get_page().get_file_path():
+                Actions.FLOW_GRAPH_SAVE() #only save if file path missing or not saved
+            subprocess.Popen('task_frontend -g '+ self.get_page().get_file_path(), 
                              shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
         else:
