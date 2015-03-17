@@ -2,8 +2,7 @@
 Copyright 2008-2011 Free Software Foundation, Inc.
 This file is part of GNU Radio
 
-GNU Radio Companion is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
+GNU Radio Companion is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
 of the License, or (at your option) any later version.
 
@@ -18,6 +17,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 """
 
 import os
+import stat
 import sys
 import subprocess
 import tempfile
@@ -104,6 +104,9 @@ class TopBlockGenerator(object):
         open(self.get_file_path(), 'w').write(
             self._build_python_code_from_template()
         )
+        # set the "executable" bit for the python file. On platforms where unsupported does nothing.
+        os.chmod(self.get_file_path(),
+                os.stat(self.get_file_path()).st_mode | stat.S_IEXEC)
 
     def get_popen(self):
         """
