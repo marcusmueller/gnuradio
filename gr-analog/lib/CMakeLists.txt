@@ -78,6 +78,7 @@ list(APPEND analog_sources
     quadrature_demod_cf_impl.cc
     rail_ff_impl.cc
     simple_squelch_cc_impl.cc
+    phase_accumulator_ff_impl.cc
 )
 
 #Add Windows DLL resource file if using MSVC

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<block>
+  <name>phase_accumulator_ff</name>
+  <key>analog_phase_accumulator_ff</key>
+  <category>analog</category>
+  <import>import analog</import>
+  <make>analog.phase_accumulator_ff()</make>
+  <sink>
+    <name>in</name>
+    <type>float</type>
+  </sink>
+  <source>
+    <name>out</name>
+    <type>float</type>
+  </source>
+</block>

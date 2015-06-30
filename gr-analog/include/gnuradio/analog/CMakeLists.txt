@@ -66,7 +66,7 @@ install(FILES
     rail_ff.h
     sig_source_waveform.h
     simple_squelch_cc.h
-    DESTINATION ${GR_INCLUDE_DIR}/gnuradio/analog
+    phase_accumulator_ff.h DESTINATION ${GR_INCLUDE_DIR}/gnuradio/analog
     COMPONENT "analog_devel"
 )
 
