@@ -55,7 +55,8 @@ namespace gr {
     {
     public:
       usrp_source_impl(const ::uhd::device_addr_t &device_addr,
-                       const ::uhd::stream_args_t &stream_args);
+                       const ::uhd::stream_args_t &stream_args,
+                       const bool initial_streaming = true);
       ~usrp_source_impl();
 
       void setup_rpc();
@@ -160,6 +161,8 @@ namespace gr {
       std::vector<double> _curr_gain;
       boost::dynamic_bitset<> _chans_to_tune;
       bool _call_tune;
+      //! Enable or disable continuous streaming when flowgraph starts.
+      bool _initial_streaming;
     };
 
   } /* namespace uhd */
