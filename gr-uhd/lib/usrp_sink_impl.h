@@ -28,6 +28,7 @@ static const pmt::pmt_t SOB_KEY = pmt::string_to_symbol("tx_sob");
 static const pmt::pmt_t EOB_KEY = pmt::string_to_symbol("tx_eob");
 static const pmt::pmt_t TIME_KEY = pmt::string_to_symbol("tx_time");
 static const pmt::pmt_t FREQ_KEY = pmt::string_to_symbol("tx_freq");
+static const pmt::pmt_t TUNE_KEY = pmt::string_to_symbol("tx_tune");
 static const pmt::pmt_t COMMAND_KEY = pmt::string_to_symbol("tx_command");
 
 namespace gr {

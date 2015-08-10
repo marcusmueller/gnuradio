@@ -490,12 +490,13 @@ namespace gr {
          *
          * This includes:
          * - tx_freq
+         * - tx_tune
          *
          * With these tags, we check if they're at the start of a burst, and do
          * the appropriate action. Otherwise, make sure the corresponding sample
          * is the last one.
          */
-        else if (pmt::equal(key, FREQ_KEY) && my_tag_count == samp0_count) {
+        else if ((pmt::equal(key, FREQ_KEY) || pmt::equal(key, TUNE_KEY)) && my_tag_count == samp0_count) {
           // If it's on the first sample, immediately do the tune:
           GR_LOG_DEBUG(d_debug_logger, boost::format("Received tx_freq on start of burst."));
           pmt::pmt_t freq_cmd = pmt::make_dict();
@@ -508,6 +509,15 @@ namespace gr {
           pmt::pmt_t freq_cmd = pmt::make_dict();
           freq_cmd = pmt::dict_add(freq_cmd, pmt::mp("freq"), value);
           commands_in_burst.push_back(freq_cmd);
+          max_count = my_tag_count + 1;
+          in_burst_cmd_offset = my_tag_count;
+        }
+        else if(pmt::equal(key, TUNE_KEY)) {
+          // If it's not on the first sample, queue this command and only tx until here:
+          GR_LOG_DEBUG(d_debug_logger, boost::format("Received tx_tune mid-burst."));
+          pmt::pmt_t tune_cmd = pmt::make_dict();
+          tune_cmd = pmt::dict_add(tune_cmd, pmt::mp("tune"), value);
+          commands_in_burst.push_back(tune_cmd);
           max_count = my_tag_count + 1;
           in_burst_cmd_offset = my_tag_count;
         }

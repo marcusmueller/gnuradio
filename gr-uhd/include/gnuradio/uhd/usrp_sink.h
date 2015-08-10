@@ -67,6 +67,7 @@ namespace gr {
      *  - pmt::string_to_symbol("tx_eob")
      *  - pmt::string_to_symbol("tx_time")
      *  - pmt::string_to_symbol("tx_freq")
+     *  - pmt::string_to_symbol("tx_tune")
      *  - pmt::string_to_symbol("tx_command")
      *  - pmt::string_to_symbol(tsb_tag_name)
      *
