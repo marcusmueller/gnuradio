@@ -56,6 +56,8 @@ namespace gr {
       d_message_subscribers(pmt::make_dict())
   {
     s_ncurrently_allocated++;
+    message_port_register_in(pmt::mp("actions"));
+    set_msg_handler(pmt::mp("actions"), boost::bind(&basic_block::process_action_msg, this, _1));
   }
 
   basic_block::~basic_block()
@@ -262,6 +264,15 @@ namespace gr {
         BOOST_FOREACH(msg_handler_t &action, d_msg_actions[key]){
           action(value);
         };
+    }
+  }
+  void basic_block::process_action_msg(const pmt::pmt_t& pair) {
+    if(pmt::is_pair(pair)){
+      const pmt::pmt_t key = pmt::car(pair);
+      const pmt::pmt_t value = pmt::cdr(pair);
+      trigger_actions(key, value);
+    } else {
+      //TODO throw
     }
   }
 } /* namespace gr */

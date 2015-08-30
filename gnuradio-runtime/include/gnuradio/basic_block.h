@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2006,2008,2009,2011,2013 Free Software Foundation, Inc.
+ * Copyright 2006,2008,2009,2011,2013,2015 Free Software Foundation, Inc.
  *
  * This file is part of GNU Radio
  *
@@ -265,6 +265,12 @@ namespace gr {
         boost::function<void (T)> bound_action = boost::bind(action, _1);
         register_msg_action(key, bound_converter, bound_action);
       }
+
+    /*!
+     * \brief process an incoming pmt action pair
+     */
+    void
+    process_action_msg(const pmt::pmt_t& pair);
 
     /*!
      * \brief trigger actions

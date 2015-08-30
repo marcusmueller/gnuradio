@@ -30,11 +30,6 @@
 #include <cppunit/TestAssert.h>
 #include <gnuradio/random.h>
 
-//  CPPUNIT_ASSERT_EQUAL(message_actions_reader_count, gr::message_actions_reader_ncurrently_allocated());
-//  CPPUNIT_ASSERT(sa > 0);
-
-// ----------------------------------------------------------------------------
-
 int g_state = 0;
 void
 qa_message_actions::modify_state(int state)
@@ -58,7 +53,9 @@ qa_message_actions::test0()
   dut->register_msg_action(pmt::mp("test"), pmt::to_long, actionfunctor);
   dut->register_msg_action(pmt::mp("test"), pmt::to_long, testf);
   CPPUNIT_ASSERT_EQUAL(g_state, 0);
-  dut->trigger_actions(pmt::mp("test"), pmt::from_long(10l));
-  CPPUNIT_ASSERT_EQUAL(g_state, 40);
-
+  dut->trigger_actions(pmt::mp("test"), pmt::from_long(1l));
+  CPPUNIT_ASSERT_EQUAL(g_state, 4);
+  dut->process_action_msg(pmt::cons(pmt::mp("test"), pmt::from_long(13l)));
+  CPPUNIT_ASSERT_EQUAL(g_state, 4 + 4 * 13);
 }
+
