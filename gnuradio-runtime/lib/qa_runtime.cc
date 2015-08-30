@@ -1,5 +1,5 @@
 /*
- * Copyright 2002,2007,2011 Free Software Foundation, Inc.
+ * Copyright 2002,2007,2011,2015 Free Software Foundation, Inc.
  *
  * This file is part of GNU Radio
  *
@@ -41,6 +41,7 @@
 #include <qa_vmcircbuf.h>
 #include <qa_sincos.h>
 #include <qa_fast_atan2f.h>
+#include <qa_message_actions.h>
 
 CppUnit::TestSuite *
 qa_runtime::suite()
@@ -58,6 +59,7 @@ qa_runtime::suite()
   s->addTest(qa_vmcircbuf::suite());
   s->addTest(qa_sincos::suite());
   s->addTest(qa_fast_atan2f::suite());
+  s->addTest(qa_message_actions::suite());
 
   return s;
 }

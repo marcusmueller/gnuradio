@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2006,2012-2013 Free Software Foundation, Inc.
+ * Copyright 2006,2012-2013,2015 Free Software Foundation, Inc.
  *
  * This file is part of GNU Radio
  *
@@ -256,5 +256,12 @@ namespace gr {
     return pmt::dict_ref(d_message_subscribers,port,pmt::PMT_NIL);
   }
 
-
+  void
+  basic_block::trigger_actions(const pmt::pmt_t& key, const pmt::pmt_t& value) {
+    if(d_msg_actions.count(key)) {
+        BOOST_FOREACH(msg_handler_t &action, d_msg_actions[key]){
+          action(value);
+        };
+    }
+  }
 } /* namespace gr */

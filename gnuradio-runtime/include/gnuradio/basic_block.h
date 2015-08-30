@@ -31,6 +31,7 @@
 #include <gnuradio/thread/thread.h>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/function.hpp>
+#include <boost/bind.hpp>
 #include <boost/foreach.hpp>
 #include <boost/thread/condition_variable.hpp>
 #include <iostream>
@@ -43,6 +44,22 @@
 #endif
 
 namespace gr {
+
+
+  /*!
+   *Function chaining operator
+   * \param outer Outer function
+   * \param inner Inner function
+   * \returns Functor that does outer(inner(value)
+   */
+  template <typename RetOuter, typename RetInner, typename ParamInner >
+  boost::function<RetOuter(ParamInner)>
+  operator % (const boost::function<RetOuter(RetInner)>& outer,
+              const boost::function<RetInner(ParamInner)>& inner)
+  {
+    return boost::bind(outer, boost::bind(inner, _1));
+  }
+
 
   /*!
    * \brief The abstract base class for all signal processing blocks.
@@ -63,6 +80,8 @@ namespace gr {
   private:
     typedef std::map<pmt::pmt_t , msg_handler_t, pmt::comparator> d_msg_handlers_t;
     d_msg_handlers_t d_msg_handlers;
+    typedef std::map<pmt::pmt_t, std::vector<msg_handler_t>, pmt::comparator> d_msg_actions_t;
+    d_msg_actions_t d_msg_actions;
 
     typedef std::deque<pmt::pmt_t> msg_queue_t;
     typedef std::map<pmt::pmt_t, msg_queue_t, pmt::comparator> msg_queue_map_t;
@@ -190,6 +209,70 @@ namespace gr {
     virtual bool message_port_is_hier(pmt::pmt_t port_id) { (void) port_id; std::cout << "is_hier\n"; return false; }
     virtual bool message_port_is_hier_in(pmt::pmt_t port_id) { (void) port_id; std::cout << "is_hier_in\n"; return false; }
     virtual bool message_port_is_hier_out(pmt::pmt_t port_id) { (void) port_id; std::cout << "is_hier_out\n"; return false; }
+
+    // ** Message passing based action interface **
+    /*!
+     * \brief register an action
+     * \param key handle to react to, e.g. pmt::mp("interpolation")
+     * \param converter Functor representing conversion from pmt_t to parameter of action
+     * \param action Functor representing the actual action
+     */
+    template<typename T>
+    void
+    register_msg_action(const pmt::pmt_t& key,
+          boost::function<T(pmt::pmt_t)> converter,
+          boost::function<void(T)> action) {
+        msg_handler_t act = action % converter;
+        d_msg_actions[key].push_back(act);
+      }
+
+    /*!
+     * \brief register an action
+     * Convenience wrapper for register_msg_action(const pmt::pmt_t& key, boost::function<T(pmt::pmt_t)> converter, boost::function<void(T)> action)
+     */
+    template<typename T>
+    void
+    register_msg_action(const pmt::pmt_t& key,
+          T converter(pmt::pmt_t),
+          boost::function<void(T)> action) {
+        boost::function<T (pmt::pmt_t)> bound_converter(converter);
+        register_msg_action(key, bound_converter, action);
+      }
+    /*!
+     * \brief register an action
+     * Convenience wrapper for register_msg_action(const pmt::pmt_t& key, boost::function<T(pmt::pmt_t)> converter, boost::function<void(T)> action)
+     */
+    //Functor, funtion pointer
+    template<typename T>
+    void
+    register_msg_action(const pmt::pmt_t& key,
+          boost::function<T(pmt::pmt_t)> converter,
+          void action(T)) {
+        boost::function<void (T)> bound_action = boost::bind(action, _1);
+        register_msg_action(key, converter, bound_action);
+      }
+    /*!
+     * \brief register an action
+     * Convenience wrapper for register_msg_action(const pmt::pmt_t& key, boost::function<T(pmt::pmt_t)> converter, boost::function<void(T)> action)
+     */
+    //Function pointer, funtion pointer
+    template<typename T>
+    void
+    register_msg_action(const pmt::pmt_t& key,
+          T converter(pmt::pmt_t),
+          void action(T)) {
+        boost::function<T (pmt::pmt_t)> bound_converter(converter);
+        boost::function<void (T)> bound_action = boost::bind(action, _1);
+        register_msg_action(key, bound_converter, bound_action);
+      }
+
+    /*!
+     * \brief trigger actions
+     * \param key key of action to be triggered
+     * \param value pmt_t of action parameter
+     */
+    void
+    trigger_actions(const pmt::pmt_t& key, const pmt::pmt_t& value);
 
     /*!
      * \brief Get input message port names.

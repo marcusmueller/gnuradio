@@ -1,4 +1,4 @@
-# Copyright 2013 Free Software Foundation, Inc.
+# Copyright 2013,2015 Free Software Foundation, Inc.
 #
 # This file is part of GNU Radio
 #
@@ -267,6 +267,7 @@ list(APPEND test_gnuradio_runtime_sources
   qa_logger.cc
   qa_vmcircbuf.cc
   qa_runtime.cc
+  qa_message_actions.cc
 )
 
 include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/math)
