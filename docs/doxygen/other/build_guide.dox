@@ -26,9 +26,14 @@ first. Most recent systems have these packages available.
 \subsection dep_global Global Dependencies
 \li git                      http://git-scm.com/downloads
 \li cmake       (>= 2.6.3)   http://www.cmake.org/cmake/resources/software.html
+\li make¹                    https://www.gnu.org/software/make/
 \li boost       (>= 1.35)    http://www.boost.org/users/download/
 \li cppunit     (>= 1.9.14)  http://freedesktop.org/wiki/Software/cppunit/
-\li fftw3f      (>= 3.0.1)   http://www.fftw.org/download.html
+\li Cheetah²                  http://cheetahtemplate.org
+
+¹ if not building with Microsoft Visual Studio
+
+² build-time dependency of libVOLK, which is required by most submodules
 
 \subsection dep_python Python Wrappers
 \li python      (>= 2.5)     http://www.python.org/download/
@@ -42,6 +47,9 @@ first. Most recent systems have these packages available.
 \subsection dep_grc grc: The GNU Radio Companion
 \li Cheetah     (>= 2.0)     http://www.cheetahtemplate.org/
 \li pygtk       (>= 2.10)    http://www.pygtk.org/downloads.html
+
+\subsection dep_fft gr-filter, gr-fft: Filters, Resamplers, and other frequency-domain tools
+\li fftw3f      (>= 3.0.1)   http://www.fftw.org/download.html
 
 \subsection dep_wavelet gr-wavelet: Collection of wavelet blocks
 \li gsl         (>= 1.10)    http://gnuwin32.sourceforge.net/packages/gsl.htm
