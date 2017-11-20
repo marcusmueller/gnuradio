@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2005,2007,2010,2012,2013 Free Software Foundation, Inc.
+# Copyright 2005,2007,2010,2012,2013,2017 Free Software Foundation, Inc.
 #
 # This file is part of GNU Radio
 #
@@ -21,6 +21,7 @@
 #
 
 from gnuradio import gr, gr_unittest, blocks
+import numpy
 
 class test_nlog10(gr_unittest.TestCase):
 
@@ -31,16 +32,15 @@ class test_nlog10(gr_unittest.TestCase):
         self.tb = None
 
     def test_001(self):
-        src_data = (-10, 0, 10, 100, 1000, 10000, 100000)
-        expected_result = (-180, -180, 10, 20, 30, 40, 50)
+        src_data = (1, 10**0.5, 10, 100, 1000, 10000, 100000)
+        expected_result = numpy.log10(src_data)*10
         src = blocks.vector_source_f(src_data)
         op = blocks.nlog10_ff(10)
         dst = blocks.vector_sink_f()
         self.tb.connect (src, op, dst)
         self.tb.run()
         result_data = dst.data()
-        self.assertFloatTuplesAlmostEqual (expected_result, result_data)
-
+        self.assertFloatTuplesAlmostEqual (expected_result, result_data, 5)
 
 if __name__ == '__main__':
     gr_unittest.run(test_nlog10, "test_nlog10.xml")

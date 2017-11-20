@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2012 Free Software Foundation, Inc.
+ * Copyright 2012, 2017 Free Software Foundation, Inc.
  *
  * This file is part of GNU Radio
  *
@@ -25,40 +25,51 @@
 #endif
 
 #include "nlog10_ff_impl.h"
+#include "volk/volk.h"
 #include <gnuradio/io_signature.h>
 
 namespace gr {
-  namespace blocks {
+    namespace blocks {
 
-    nlog10_ff::sptr nlog10_ff::make(float n, size_t vlen, float k)
-    {
-      return gnuradio::get_initial_sptr(new nlog10_ff_impl(n, vlen, k));
-    }
+        nlog10_ff::sptr nlog10_ff::make(float n, size_t vlen, float k)
+        {
+            return gnuradio::get_initial_sptr(new nlog10_ff_impl(n, vlen, k));
+        }
 
-    nlog10_ff_impl::nlog10_ff_impl(float n, size_t vlen, float k)
-      : sync_block("nlog10_ff",
-		      io_signature::make (1, 1, sizeof(float)*vlen),
-		      io_signature::make (1, 1, sizeof(float)*vlen)),
-	d_n(n), d_vlen(vlen), d_k(k)
-    {
-    }
+        nlog10_ff_impl::nlog10_ff_impl(float n, size_t vlen, float k)
+            : sync_block("nlog10_ff",
+                     io_signature::make (1, 1, sizeof(float)*vlen),
+                     io_signature::make (1, 1, sizeof(float)*vlen)),
+              d_n(n), d_vlen(vlen), d_k(k)
+        {
+        }
 
-    int
-    nlog10_ff_impl::work(int noutput_items,
-			      gr_vector_const_void_star &input_items,
-			      gr_vector_void_star &output_items)
-    {
-      const float *in = (const float *) input_items[0];
-      float *out = (float *) output_items[0];
-      int noi = noutput_items * d_vlen;
-      float n = d_n;
-      float k = d_k;
+        int
+        nlog10_ff_impl::work(int noutput_items,
+                     gr_vector_const_void_star &input_items,
+                     gr_vector_void_star &output_items)
+        {
+            const float *in = (const float *) input_items[0];
+            float *out = (float *) output_items[0];
+            const int noi = noutput_items * d_vlen;
+            const float n = d_n / log2f(10.0f);
+            const float k = d_k;
 
-      for (int i = 0; i < noi; i++)
-	out[i] = n * log10(std::max(in[i], (float) 1e-18)) + k;
+            volk_32f_log2_32f(out, in, noi);
+            if(d_n == log2f(10.0f)) {
+                return noutput_items;
+            }
+            if(k == 0.0f) {
+                for(size_t counter = 0; counter < noi; ++counter) {
+                    out[counter] = out[counter] * n;
+                }
+            } else {
+                for(size_t counter = 0; counter < noi; ++counter) {
+                    out[counter] = out[counter] * n + k;
+                }
+            }
+            return noutput_items;
+        }
 
-      return noutput_items;
-    }
-
-  } /* namespace blocks */
+    } /* namespace blocks */
 }/* namespace gr */
