@@ -29,6 +29,7 @@
 #include "@IMPL_NAME@.h"
 #include <gnuradio/io_signature.h>
 #include <stdexcept>
+#include <gnuradio/xoroshiro-variates.h>
 
 namespace gr {
   namespace analog {
@@ -46,12 +47,12 @@ namespace gr {
 		    io_signature::make(1, 1, sizeof(@TYPE@))),
       d_type(type),
 #if @IS_COMPLEX@	// complex?
-      d_ampl(ampl/sqrtf(2.0f)),
+      d_ampl(ampl/sqrtf(2.0f))
 #else
-      d_ampl(ampl),
+      d_ampl(ampl)
 #endif
-      d_rng(seed)
     {
+      xoroshiro128p_seed(d_state, seed);
       d_samples.resize(samples);
       generate();
     }
@@ -88,37 +89,68 @@ namespace gr {
 #if @IS_COMPLEX@	// complex?
 
       case GR_UNIFORM:
-	for(int i = 0; i < noutput_items; i++)
-	  d_samples[i] = gr_complex(d_ampl * ((d_rng.ran1() * 2.0) - 1.0),
-				    d_ampl * ((d_rng.ran1() * 2.0) - 1.0));
+        for(int i = 0; i < noutput_items; i++) {
+          uint64_t rand  = xoroshiro128p_next(d_state);
+          uint32_t re_rand = rand & (0xFFFFFFFF);
+          uint32_t im_rand = (rand >> 32);
+          float re_uni = uint32_to_f(re_rand);
+          float im_uni = uint32_to_f(im_rand);
+          d_samples[i] = gr_complex(d_ampl * ((re_uni * 2.0) - 1.0),
+                                    d_ampl * ((im_uni * 2.0) - 1.0));
+        }
 	break;
 
       case GR_GAUSSIAN:
-	for(int i = 0; i < noutput_items; i++)
-	  d_samples[i] = d_ampl * d_rng.rayleigh_complex();
+        for(int i = 0; i < noutput_items; i++) {
+          float re_gauss = xoroshiro128p_cltf(d_state, 32);
+          float im_gauss = xoroshiro128p_cltf(d_state, 32);
+          d_samples[i] = gr_complex(d_ampl * re_gauss, d_ampl* im_gauss);
+        }
 	break;
 
 #else			// nope...
 
       case GR_UNIFORM:
-	for(int i = 0; i < noutput_items; i++)
-	  d_samples[i] = (@TYPE@)(d_ampl * ((d_rng.ran1() * 2.0) - 1.0));
+        int i;
+        for(i = 0; i <= noutput_items-2; i += 2) {
+          uint64_t rand  = xoroshiro128p_next(d_state);
+          uint32_t first_rand = rand & (0xFFFFFFFF);
+          uint32_t secon_rand = (rand >> 32);
+          d_samples[i]   = uint32_to_f(first_rand);
+          d_samples[i+1] = uint32_to_f(secon_rand);
+        }
+        for(; i < noutput_items; i++) {
+          uint64_t rand  = xoroshiro128p_next(d_state);
+          d_samples[i] = uint64_to_f(rand);
+        }
 	break;
 
       case GR_GAUSSIAN:
-	for(int i = 0; i < noutput_items; i++)
-	  d_samples[i] = (@TYPE@)(d_ampl * d_rng.gasdev());
+        for(int i = 0; i < noutput_items; i++) {
+          d_samples[i] = xoroshiro128p_cltf(d_state, 32);
+        }
 	break;
 
       case GR_LAPLACIAN:
-	for(int i = 0; i < noutput_items; i++)
-	  d_samples[i] = (@TYPE@)(d_ampl * d_rng.laplacian());
+        for(int i = 0; i < noutput_items; i++) {
+          uint64_t rand = xoroshiro128p_next(d_state);
+          // same logic as in gr::random::laplacian, but fewer redundant math ops
+          float uni_02  = 2.0f * uint64_to_f(rand);
+          if(uni_02 > 1.0f) {
+            d_samples[i] = -d_ampl * logf(2-uni_02);
+          } else {
+            d_samples[i] =  d_ampl * logf(uni_02);
+          }
+        }
 	break;
 
-      case GR_IMPULSE:	// FIXME changeable impulse settings
-	for(int i = 0; i < noutput_items; i++)
-	  d_samples[i] = (@TYPE@)(d_ampl * d_rng.impulse(9));
-	break;
+      case GR_IMPULSE:	// FIXME changeable impulse settings; 9 is a "magic constant"
+        for(int i = 0; i < noutput_items; i++) {
+          float uni = uint64_to_f(xoroshiro128p_next(d_state));
+          float z = -M_SQRT2 * logf(uni);
+          d_samples[i] = (fabsf(z) <= 9) ? 0.0f : z;
+        }
+        break;
 #endif
 
       default:
@@ -144,30 +176,23 @@ namespace gr {
 
     @TYPE@ @IMPL_NAME@::sample()
     {
-#ifdef HAVE_RAND48
-        size_t idx = lrand48() % d_samples.size();
-#else
-        size_t idx = rand() % d_samples.size();
-#endif
-        return d_samples[idx];
+      size_t idx = (xoroshiro128p_next(d_state) >> 3) % d_samples.size();
+      return d_samples[idx];
     }
 
-#ifndef FASTNOISE_RANDOM_SIGN
-#ifndef HAVE_RAND48
-#define FASTNOISE_RANDOM_SIGN       ((rand()%2==0)?1:-1)
-#else
-#define FASTNOISE_RANDOM_SIGN       ((lrand48()%2==0)?1:-1)
-#endif
-#endif
 
     @TYPE@ @IMPL_NAME@::sample_unbiased()
     {
+      uint64_t random_int = xoroshiro128p_next(d_state);
 #if @IS_COMPLEX@
-        gr_complex s(sample());
-        return gr_complex(FASTNOISE_RANDOM_SIGN * s.real(),
-                          FASTNOISE_RANDOM_SIGN * s.imag());
+      gr_complex s(sample());
+      float re, im;
+      re = (random_int & (UINT64_C(1)<<23)) ? (- s.real()) : (s.real());
+      im = (random_int & (UINT64_C(1)<<42)) ? (- s.imag()) : (s.imag());
+      return gr_complex(re, im);
 #else
-        return FASTNOISE_RANDOM_SIGN * sample();
+      float s = sample();
+      return (random_int & (1<<23)) ? (-s) : s;
 #endif
     }
 
