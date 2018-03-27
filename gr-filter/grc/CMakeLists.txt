@@ -50,5 +50,6 @@ install(FILES
     variable_band_pass_filter_taps.block.yml
     variable_band_reject_filter_taps.block.yml
     variable_rrc_filter_taps.block.yml
+    variable_file_filter_taps.block.yml
     DESTINATION ${GRC_BLOCKS_DIR}
 )
