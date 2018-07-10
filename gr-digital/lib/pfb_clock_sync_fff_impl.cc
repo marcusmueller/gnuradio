@@ -50,8 +50,8 @@ namespace gr {
 				     osps));
     }
 
-    static int ios[] = {sizeof(float), sizeof(float), sizeof(float), sizeof(float)};
-    static std::vector<int> iosig(ios, ios+sizeof(ios)/sizeof(int));
+    static size_t ios[] = {sizeof(float), sizeof(float), sizeof(float), sizeof(float)};
+    static std::vector<size_t> iosig(ios, ios+sizeof(ios)/sizeof(size_t));
     pfb_clock_sync_fff_impl::pfb_clock_sync_fff_impl(double sps, float loop_bw,
 						     const std::vector<float> &taps,
 						     unsigned int filter_size,

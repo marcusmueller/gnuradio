@@ -74,7 +74,7 @@ namespace gr {
                            const std::vector<float> &taps)
       : block("symbol_sync_cc",
               io_signature::make(1, 1, sizeof(gr_complex)),
-              io_signature::makev(1, 4, std::vector<int>(4, sizeof(float)))),
+              io_signature::makev(1, 4, std::vector<size_t>(4, sizeof(float)))),
         d_ted(NULL),
         d_interp(NULL),
         d_inst_output_period(sps / static_cast<float>(osps)),
@@ -95,11 +95,11 @@ namespace gr {
       // an anonymous std::vector<int>() rvalue, with a const expression
       // initializing the vector, to work.  Lvalues seem to make everything
       // better.
-      int output_io_sizes[4] = {
+      size_t output_io_sizes[4] = {
           sizeof(gr_complex),
           sizeof(float), sizeof(float), sizeof(float)
       };
-      std::vector<int> output_io_sizes_vector(&output_io_sizes[0],
+      std::vector<size_t> output_io_sizes_vector(&output_io_sizes[0],
                                               &output_io_sizes[4]);
       set_output_signature(io_signature::makev(1, 4, output_io_sizes_vector));
 

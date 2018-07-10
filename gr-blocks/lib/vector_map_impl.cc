@@ -31,21 +31,21 @@
 namespace gr {
   namespace blocks {
 
-    std::vector<int>
+    std::vector<size_t>
     get_in_sizeofs(size_t item_size, std::vector<size_t> in_vlens)
     {
-      std::vector<int> in_sizeofs;
+      std::vector<size_t> in_sizeofs;
       for(unsigned int i = 0; i < in_vlens.size(); i++) {
         in_sizeofs.push_back(in_vlens[i]*item_size);
       }
       return in_sizeofs;
     }
 
-    std::vector<int>
+    std::vector<size_t>
     get_out_sizeofs(size_t item_size,
                     std::vector< std::vector< std::vector<size_t> > > mapping)
     {
-      std::vector<int> out_sizeofs;
+      std::vector<size_t> out_sizeofs;
       for(unsigned int i = 0; i < mapping.size(); i++) {
         out_sizeofs.push_back(mapping[i].size()*item_size);
       }

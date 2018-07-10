@@ -41,8 +41,8 @@ namespace gr {
 	(new costas_loop_cc_impl(loop_bw, order, use_snr));
     }
 
-    static int ios[] = { sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(float) };
-    static std::vector<int> iosig(ios, ios+sizeof(ios)/sizeof(int));
+    static size_t ios[] = { sizeof(gr_complex), sizeof(float), sizeof(float), sizeof(float) };
+    static std::vector<size_t> iosig(ios, ios+sizeof(ios)/sizeof(size_t));
 
     costas_loop_cc_impl::costas_loop_cc_impl(float loop_bw, int order, bool use_snr)
       : sync_block("costas_loop_cc",

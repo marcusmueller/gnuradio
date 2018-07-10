@@ -46,8 +46,8 @@ namespace gr {
 					    fmin, fmax));
     }
 
-    static int ios[] = {sizeof(char), sizeof(float), sizeof(float), sizeof(float), sizeof(gr_complex)};
-    static std::vector<int> iosig(ios, ios+sizeof(ios)/sizeof(int));
+    static size_t ios[] = {sizeof(char), sizeof(float), sizeof(float), sizeof(float), sizeof(gr_complex)};
+    static std::vector<size_t> iosig(ios, ios+sizeof(ios)/sizeof(size_t));
     constellation_receiver_cb_impl::constellation_receiver_cb_impl(constellation_sptr constellation,
 								   float loop_bw, float fmin, float fmax)
       : block("constellation_receiver_cb",
