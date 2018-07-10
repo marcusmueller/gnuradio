@@ -39,21 +39,21 @@ namespace gr {
 
 
     static sptr make(int min_streams, int max_streams,
-                     int sizeof_stream_item);
+                     size_t sizeof_stream_item);
     static sptr make2(int min_streams, int max_streams,
-                      int sizeof_stream_item1,
-                      int sizeof_stream_item2);
+                      size_t sizeof_stream_item1,
+                      size_t sizeof_stream_item2);
     static sptr make3(int min_streams, int max_streams,
-                      int sizeof_stream_item1,
-                      int sizeof_stream_item2,
-                      int sizeof_stream_item3);
+                      size_t sizeof_stream_item1,
+                      size_t sizeof_stream_item2,
+                      size_t sizeof_stream_item3);
     static sptr makev(int min_streams, int max_streams,
-                      const std::vector<int> &sizeof_stream_items);
+                      const std::vector<size_t> &sizeof_stream_items);
 
     int min_streams() const { return d_min_streams; }
     int max_streams() const { return d_max_streams; }
-    int sizeof_stream_item(int index) const;
-    std::vector<int> sizeof_stream_items() const;
+    size_t sizeof_stream_item(size_t index) const;
+    std::vector<size_t> sizeof_stream_items() const;
   };
 
 } /* namespace gr */

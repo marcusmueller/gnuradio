@@ -46,7 +46,7 @@ qa_io_signature::t2()
     gr::io_signature::make(3, gr::io_signature::IO_INFINITE, sizeof(int));
 
   CPPUNIT_ASSERT_EQUAL(p->min_streams(), 3);
-  CPPUNIT_ASSERT_EQUAL(p->sizeof_stream_item(0), (int)sizeof(int));
+  CPPUNIT_ASSERT_EQUAL(p->sizeof_stream_item(0), sizeof(int));
 }
 
 void
@@ -57,9 +57,9 @@ qa_io_signature::t3()
 
   CPPUNIT_ASSERT_EQUAL(p->min_streams(), 0);
   CPPUNIT_ASSERT_EQUAL(p->max_streams(), 5);
-  CPPUNIT_ASSERT_EQUAL(p->sizeof_stream_item(0), 1);
-  CPPUNIT_ASSERT_EQUAL(p->sizeof_stream_item(1), 2);
-  CPPUNIT_ASSERT_EQUAL(p->sizeof_stream_item(2), 3);
-  CPPUNIT_ASSERT_EQUAL(p->sizeof_stream_item(3), 3);
-  CPPUNIT_ASSERT_EQUAL(p->sizeof_stream_item(4), 3);
+  CPPUNIT_ASSERT_EQUAL(p->sizeof_stream_item(0), (size_t) 1);
+  CPPUNIT_ASSERT_EQUAL(p->sizeof_stream_item(1), (size_t) 2);
+  CPPUNIT_ASSERT_EQUAL(p->sizeof_stream_item(2), (size_t) 3);
+  CPPUNIT_ASSERT_EQUAL(p->sizeof_stream_item(3), (size_t) 3);
+  CPPUNIT_ASSERT_EQUAL(p->sizeof_stream_item(4), (size_t) 3);
 }

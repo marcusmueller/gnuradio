@@ -41,7 +41,7 @@ qa_gr_block::t0 ()
   CPPUNIT_ASSERT_EQUAL(0, src1->input_signature()->max_streams ());
   CPPUNIT_ASSERT_EQUAL(1, src1->output_signature()->min_streams ());
   CPPUNIT_ASSERT_EQUAL(-1, src1->output_signature()->max_streams ());
-  CPPUNIT_ASSERT_EQUAL((int) sizeof(int),
+  CPPUNIT_ASSERT_EQUAL(sizeof(int),
                        src1->output_signature()->sizeof_stream_item (0));
 
   gr::block_sptr src2(gr::blocks::null_source::make(sizeof(short)));
@@ -49,7 +49,7 @@ qa_gr_block::t0 ()
   CPPUNIT_ASSERT_EQUAL(0, src2->input_signature()->max_streams ());
   CPPUNIT_ASSERT_EQUAL(1, src2->output_signature()->min_streams ());
   CPPUNIT_ASSERT_EQUAL(-1, src2->output_signature()->max_streams ());
-  CPPUNIT_ASSERT_EQUAL((int)sizeof (short),
+  CPPUNIT_ASSERT_EQUAL(sizeof (short),
                        src2->output_signature()->sizeof_stream_item (0));
 }
 
@@ -62,7 +62,7 @@ qa_gr_block::t1 ()
   CPPUNIT_ASSERT_EQUAL (std::string ("null_sink"), dst1->name ());
   CPPUNIT_ASSERT_EQUAL (1, dst1->input_signature()->min_streams ());
   CPPUNIT_ASSERT_EQUAL (-1, dst1->input_signature()->max_streams ());
-  CPPUNIT_ASSERT_EQUAL ((int) sizeof (int),
+  CPPUNIT_ASSERT_EQUAL (sizeof (int),
             dst1->input_signature()->sizeof_stream_item (0));
 
   CPPUNIT_ASSERT_EQUAL (0, dst1->output_signature()->max_streams ());
@@ -71,7 +71,7 @@ qa_gr_block::t1 ()
   CPPUNIT_ASSERT_EQUAL (std::string ("null_sink"), dst2->name ());
   CPPUNIT_ASSERT_EQUAL (1, dst2->input_signature()->min_streams ());
   CPPUNIT_ASSERT_EQUAL (-1, dst2->input_signature()->max_streams ());
-  CPPUNIT_ASSERT_EQUAL ((int) sizeof (short),
+  CPPUNIT_ASSERT_EQUAL (sizeof (short),
             dst2->input_signature()->sizeof_stream_item (0));
   CPPUNIT_ASSERT_EQUAL (0, dst2->output_signature()->max_streams ());
 }

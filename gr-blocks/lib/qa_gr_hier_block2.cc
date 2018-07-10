@@ -37,14 +37,14 @@ void qa_hier_block2::test_make()
     CPPUNIT_ASSERT(src1);
     CPPUNIT_ASSERT_EQUAL(std::string("test"), src1->name());
 
-    CPPUNIT_ASSERT_EQUAL(1 * (int) sizeof(int),
+    CPPUNIT_ASSERT_EQUAL(sizeof(int),
 			 src1->input_signature()->sizeof_stream_item(0));
 
     CPPUNIT_ASSERT_EQUAL(1, src1->input_signature()->min_streams());
     CPPUNIT_ASSERT_EQUAL(1, src1->input_signature()->max_streams());
 
 
-    CPPUNIT_ASSERT_EQUAL(1 * (int) sizeof(int),
+    CPPUNIT_ASSERT_EQUAL(sizeof(int),
 			 src1->output_signature()->sizeof_stream_item(0));
 
     CPPUNIT_ASSERT_EQUAL(1, src1->output_signature()->min_streams());

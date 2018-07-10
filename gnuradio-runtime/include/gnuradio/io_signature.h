@@ -36,10 +36,10 @@ namespace gr {
   {
     int			d_min_streams;
     int			d_max_streams;
-    std::vector<int>	d_sizeof_stream_item;
+    std::vector<size_t>	d_sizeof_stream_item;
 
     io_signature(int min_streams, int max_streams,
-                 const std::vector<int> &sizeof_stream_items);
+                 const std::vector<size_t> &sizeof_stream_items);
 
   public:
     typedef boost::shared_ptr<io_signature> sptr;
@@ -57,7 +57,7 @@ namespace gr {
      * \param sizeof_stream_item  specify the size of the items in each stream
      */
     static sptr make(int min_streams, int max_streams,
-                     int sizeof_stream_item);
+                     size_t sizeof_stream_item);
 
     /*!
      * \brief Create an i/o signature
@@ -68,8 +68,8 @@ namespace gr {
      * \param sizeof_stream_item2 specify the size of the items in the second and subsequent streams
      */
     static sptr make2(int min_streams, int max_streams,
-                      int sizeof_stream_item1,
-                      int sizeof_stream_item2);
+                      size_t sizeof_stream_item1,
+                      size_t sizeof_stream_item2);
 
     /*!
      * \brief Create an i/o signature
@@ -81,9 +81,9 @@ namespace gr {
      * \param sizeof_stream_item3 specify the size of the items in the third and subsequent streams
      */
     static sptr make3(int min_streams, int max_streams,
-                      int sizeof_stream_item1,
-                      int sizeof_stream_item2,
-                      int sizeof_stream_item3);
+                      size_t sizeof_stream_item1,
+                      size_t sizeof_stream_item2,
+                      size_t sizeof_stream_item3);
 
     /*!
      * \brief Create an i/o signature
@@ -98,12 +98,12 @@ namespace gr {
      * sizeof_stream_items must contain at least 1 entry.
      */
     static sptr makev(int min_streams, int max_streams,
-                      const std::vector<int> &sizeof_stream_items);
+                      const std::vector<size_t> &sizeof_stream_items);
 
     int min_streams() const { return d_min_streams; }
     int max_streams() const { return d_max_streams; }
-    int sizeof_stream_item(int index) const;
-    std::vector<int> sizeof_stream_items() const;
+    size_t sizeof_stream_item(size_t index) const;
+    std::vector<size_t> sizeof_stream_items() const;
   };
 
 } /* namespace gr */
