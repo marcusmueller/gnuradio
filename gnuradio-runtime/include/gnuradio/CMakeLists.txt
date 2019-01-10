@@ -83,6 +83,14 @@ install(FILES
   rpcserver_selector.h
   DESTINATION ${GR_INCLUDE_DIR}/gnuradio
 )
+install(FILES
+  log/log.h
+  log/entry.h
+  log/backend.h
+  log/threadsafe_queue.h
+  log/stderr_logger.h
+  DESTINATION ${GR_INCLUDE_DIR}/gnuradio/log
+)
 
 if(THRIFT_FOUND)
 install(FILES

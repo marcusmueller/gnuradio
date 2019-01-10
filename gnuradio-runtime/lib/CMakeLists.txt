@@ -118,6 +118,9 @@ list(APPEND gnuradio_runtime_sources
   vmcircbuf_prefs.cc
   vmcircbuf_sysv_shm.cc
   ${gnuradio_ctrlport_sources}
+  log/log.cpp
+  log/entry.cpp
+  log/stderr_logger.cpp
 )
 
 list(APPEND gnuradio_runtime_libs
@@ -243,6 +246,17 @@ if(ENABLE_TESTING)
   foreach(qa_file ${test_gnuradio_runtime_sources})
     GR_ADD_CPP_TEST("runtime_${qa_file}"
       ${CMAKE_CURRENT_SOURCE_DIR}/${qa_file}
+    )
+  endforeach(qa_file)
+  # Logging system tests:
+  list(APPEND test_gnuradio_logging_sources
+    qa_logging.cc
+    )
+  list(APPEND GR_TEST_TARGET_DEPS gnuradio-runtime)
+
+  foreach(qa_file ${test_gnuradio_logging_sources})
+    GR_ADD_CPP_TEST("logging_${qa_file}"
+      ${CMAKE_CURRENT_SOURCE_DIR}/log/${qa_file}
     )
   endforeach(qa_file)
 
