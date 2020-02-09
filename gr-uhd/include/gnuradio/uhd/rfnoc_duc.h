@@ -16,7 +16,7 @@
 namespace gr {
 namespace uhd {
 
-/*! RFNoC Digital Unconverter Block
+/*! RFNoC Digital Upconverter Block
  *
  * \ingroup uhd_blk
  */
