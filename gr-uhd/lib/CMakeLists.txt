@@ -21,7 +21,7 @@ if(ENABLE_UHD_RFNOC)
         rfnoc_block_generic_impl.cc
         rfnoc_ddc_impl.cc
         rfnoc_duc_impl.cc
-        rfnoc_graph_impl.cpp
+        rfnoc_graph_impl.cc
         rfnoc_rx_radio_impl.cc
         rfnoc_rx_streamer_impl.cc
         rfnoc_tx_radio_impl.cc
