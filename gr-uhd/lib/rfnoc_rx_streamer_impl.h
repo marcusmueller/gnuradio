@@ -24,7 +24,7 @@ public:
                            const bool issue_stream_cmd_on_start);
     ~rfnoc_rx_streamer_impl();
 
-    std::string get_unique_id() const { return d_unique_id; }
+    std::string get_unique_id() const override { return d_unique_id; }
 
     /***** API ***************************************************************/
     void set_start_time(const ::uhd::time_spec_t& time);
@@ -35,7 +35,7 @@ public:
     bool stop() override;
     int work(int noutput_items,
              gr_vector_const_void_star& input_items,
-             gr_vector_void_star& output_items);
+             gr_vector_void_star& output_items) override;
 
 private:
     void flush();

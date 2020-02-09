@@ -24,13 +24,13 @@ public:
     ~rfnoc_tx_streamer_impl();
 
     /***** API ***************************************************************/
-    std::string get_unique_id() const { return d_unique_id; }
+    std::string get_unique_id() const override { return d_unique_id; }
 
     /***** GNU Radio API *****************************************************/
     bool check_topology(int, int) override;
     int work(int noutput_items,
              gr_vector_const_void_star& input_items,
-             gr_vector_void_star& output_items);
+             gr_vector_void_star& output_items) override;
 
 private:
     //! notification to send more
