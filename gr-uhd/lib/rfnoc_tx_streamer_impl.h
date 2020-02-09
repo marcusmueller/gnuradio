@@ -33,6 +33,8 @@ public:
              gr_vector_void_star& output_items);
 
 private:
+    //! notification to send more
+    void wake_up();
     //! Number of streaming channels
     const size_t d_num_chans;
     //! Bytes per item (e.g. 4 for sc16)
@@ -49,8 +51,11 @@ private:
     const std::string d_unique_id;
     //! Stash for the TX metadata
     ::uhd::tx_metadata_t d_metadata;
-    //! TX timeout value
-    double d_timeout = 1.0;
+    //! periodicity of check for incoming data; large values might induce high latency
+    unsigned int d_sleep_microseconds = 2000;
+    //! timeout for recv: large values have the potential to block work for long and thus
+    //! are undesirable
+    double d_timeout = 0.001;
 };
 
 } // namespace uhd

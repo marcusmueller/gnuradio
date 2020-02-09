@@ -15,6 +15,9 @@
 #include <gnuradio/io_signature.h>
 #include <uhd/convert.hpp>
 #include <uhd/rfnoc/node.hpp>
+#include <chrono>
+#include <future>
+#include <thread>
 
 const pmt::pmt_t EOB_KEY = pmt::string_to_symbol("rx_eob");
 const pmt::pmt_t CMD_TIME_KEY = pmt::mp("time");
@@ -108,6 +111,15 @@ bool rfnoc_rx_streamer_impl::stop()
     return true;
 }
 
+void rfnoc_rx_streamer_impl::wake_up()
+{
+    static auto system_port = pmt::mp("system");
+    static auto done_msg = pmt::mp("done");
+
+    std::this_thread::sleep_for(std::chrono::microseconds(d_sleep_microseconds));
+    post(system_port, pmt::cons(done_msg, pmt::from_bool(false)));
+}
+
 int rfnoc_rx_streamer_impl::work(int noutput_items,
                                  gr_vector_const_void_star& input_items,
                                  gr_vector_void_star& output_items)
@@ -115,6 +127,13 @@ int rfnoc_rx_streamer_impl::work(int noutput_items,
     const size_t max_num_items_to_rx = noutput_items * d_vlen;
     const size_t num_items_recvd =
         d_streamer->recv(output_items, max_num_items_to_rx, d_metadata, d_timeout);
+
+    if (!num_items_recvd) {
+        // if no samples were ready, yield back to the scheduler, but wake me up in time
+        // to check for more
+        std::async(&rfnoc_rx_streamer_impl::wake_up, this);
+        return 0;
+    }
 
     const size_t num_vecs_recvd = num_items_recvd / d_vlen;
     if (num_items_recvd % d_vlen) {

@@ -14,6 +14,9 @@
 #include <gnuradio/io_signature.h>
 #include <uhd/convert.hpp>
 #include <uhd/rfnoc/node.hpp>
+#include <chrono>
+#include <future>
+#include <thread>
 
 namespace gr {
 namespace uhd {
@@ -66,6 +69,15 @@ bool rfnoc_tx_streamer_impl::check_topology(int, int)
     return true;
 }
 
+void rfnoc_tx_streamer_impl::wake_up()
+{
+    static auto system_port = pmt::mp("system");
+    static auto done_msg = pmt::mp("done");
+
+    std::this_thread::sleep_for(std::chrono::microseconds(d_sleep_microseconds));
+    post(system_port, pmt::cons(done_msg, pmt::from_bool(false)));
+}
+
 /******************************************************************************
  * GNU Radio API
  *****************************************************************************/
@@ -76,6 +88,14 @@ int rfnoc_tx_streamer_impl::work(int noutput_items,
     const size_t num_items_to_send = noutput_items * d_vlen;
     const size_t num_items_sent =
         d_streamer->send(input_items, num_items_to_send, d_metadata, d_timeout);
+
+    if (num_items_sent < num_items_to_send) {
+        // if not all samples were sent, yield back to the scheduler, but wake me up in
+        // time to check for more
+        std::async(&rfnoc_tx_streamer_impl::wake_up, this);
+        return 0;
+    }
+
     const size_t num_vecs_sent = num_items_sent / d_vlen;
 
     if (num_items_sent % d_vlen) {
