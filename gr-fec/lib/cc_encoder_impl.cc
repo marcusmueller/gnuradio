@@ -18,6 +18,7 @@
 #include <volk/volk.h>
 #include <volk/volk_typedefs.h>
 #include <boost/assign/list_of.hpp>
+#include <boost/format.hpp>
 #include <cmath>
 #include <cstdio>
 #include <sstream>

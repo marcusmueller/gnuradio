@@ -14,6 +14,7 @@
 
 #include <gnuradio/fec/generic_encoder.h>
 #include <gnuradio/prefs.h>
+#include <boost/format.hpp>
 #include <cstdio>
 
 namespace gr {
@@ -48,6 +49,10 @@ generic_encoder::generic_encoder(std::string name)
 
 generic_encoder::~generic_encoder() {}
 
+std::string generic_encoder::alias()
+{
+    return (boost::format("%s%d") % d_name % unique_id()).str();
+}
 const char* generic_encoder::get_input_conversion() { return "none"; }
 
 const char* generic_encoder::get_output_conversion() { return "none"; }
