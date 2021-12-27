@@ -389,8 +389,8 @@ void eye_sink_f_impl::_npoints_resize()
 void eye_sink_f_impl::_adjust_tags(int adj)
 {
     for (auto& d_tag : d_tags) {
-        for (size_t t = 0; t < d_tag.size(); t++) {
-            d_tag[t].offset += adj;
+        for (auto& t : d_tag) {
+            t.offset += adj;
         }
     }
 }
