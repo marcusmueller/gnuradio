@@ -40,7 +40,7 @@ public:
                    const std::string& channel,
                    attr_type_t type,
                    bool output);
-    ~attr_sink_impl();
+    ~attr_sink_impl() override;
 
     void write_attribute(pmt::pmt_t pdu);
 };
