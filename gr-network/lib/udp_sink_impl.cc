@@ -1,6 +1,7 @@
 /* -*- c++ -*- */
 /*
  * Copyright 2020 Free Software Foundation, Inc.
+ * Copyright 2022 Marcus Müller
  *
  * This file is part of GNU Radio
  *
@@ -8,10 +9,12 @@
  *
  */
 
+#include <memory>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
+#include "udp_helpers.h"
 #include "udp_sink_impl.h"
 #include <gnuradio/io_signature.h>
 #include <boost/array.hpp>
@@ -49,7 +52,7 @@ udp_sink_impl::udp_sink_impl(size_t itemsize,
       d_port(port),
       d_itemsize(itemsize),
       d_veclen(veclen),
-      d_header_type(header_type),
+      d_header_type{ header_type },
       d_header_size(0),
       d_seq_num(0),
       d_payloadsize(payloadsize),
@@ -65,15 +68,15 @@ udp_sink_impl::udp_sink_impl(size_t itemsize,
     // fragmentation.
 
     switch (d_header_type) {
-    case HEADERTYPE_SEQNUM:
+    case udp_headertype::SEQNUM:
         d_header_size = sizeof(header_seq_num);
         break;
 
-    case HEADERTYPE_SEQPLUSSIZE:
+    case udp_headertype::SEQPLUSSIZE:
         d_header_size = sizeof(header_seq_plus_size);
         break;
 
-    case HEADERTYPE_NONE:
+    case udp_headertype::NONE:
         d_header_size = 0;
         break;
 
@@ -97,37 +100,25 @@ udp_sink_impl::udp_sink_impl(size_t itemsize,
     d_precomp_datasize = d_payloadsize - d_header_size;
     d_precomp_data_overitemsize = d_precomp_datasize / d_itemsize;
 
-    int out_multiple = (d_payloadsize - d_header_size) / d_block_size;
-
-    if (out_multiple == 1)
-        out_multiple = 2; // Ensure we get pairs, for instance complex -> ichar pairs
-
+    // Ensure we get pairs, for instance complex -> ichar pairs
+    auto out_multiple =
+        std::max<unsigned int>((d_payloadsize - d_header_size) / d_block_size, 2);
     gr::block::set_output_multiple(out_multiple);
 }
 
 bool udp_sink_impl::start()
 {
-    d_localbuffer = new char[d_payloadsize];
+    d_local_buffer.resize(d_payloadsize);
 
-    long max_circ_buffer;
+    d_localqueue = std::make_unique<boost::circular_buffer<char>>(
+        gr::network::udp::circbuffer_size(d_payloadsize));
 
-    // Let's keep it from getting too big
-    if (d_payloadsize < 2000) {
-        max_circ_buffer = d_payloadsize * 4000;
-    } else {
-        if (d_payloadsize < 5000)
-            max_circ_buffer = d_payloadsize * 2000;
-        else
-            max_circ_buffer = d_payloadsize * 1500;
-    }
-
-    d_localqueue = new boost::circular_buffer<char>(max_circ_buffer);
-
-    d_udpsocket = new boost::asio::ip::udp::socket(d_io_service);
+    d_udpsocket = std::make_unique<boost::asio::ip::udp::socket>(d_io_service);
 
     std::string str_port = (boost::format("%d") % d_port).str();
     std::string str_host = d_host.empty() ? std::string("localhost") : d_host;
     boost::asio::ip::udp::resolver resolver(d_io_service);
+    // FIXME: boost documentation says ::query is deprecated
     boost::asio::ip::udp::resolver::query query(
         str_host, str_port, boost::asio::ip::resolver_query_base::passive);
 
@@ -139,18 +130,11 @@ bool udp_sink_impl::start()
                                  err.message());
     }
 
-    if (d_host.find(":") != std::string::npos)
-        is_ipv6 = true;
-    else {
-        // This block supports a check that a name rather than an IP is provided.
-        // the endpoint is then checked after the resolver is done.
-        if (d_endpoint.address().is_v6())
-            is_ipv6 = true;
-        else
-            is_ipv6 = false;
-    }
+    // This block supports a check that a name rather than an IP is provided.
+    // the endpoint is then checked after the resolver is done.
+    bool ipv6 = (d_host.find(":") != std::string::npos) || d_endpoint.address().is_v6();
 
-    if (is_ipv6) {
+    if (ipv6) {
         d_udpsocket->open(boost::asio::ip::udp::v6());
     } else {
         d_udpsocket->open(boost::asio::ip::udp::v4());
@@ -172,26 +156,21 @@ bool udp_sink_impl::stop()
         if (b_send_eof) {
             // Send a few zero-length packets to signal receiver we are done
             boost::array<char, 0> send_buf;
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++) {
                 d_udpsocket->send_to(boost::asio::buffer(send_buf), d_endpoint);
+            }
         }
 
         d_udpsocket->close();
-        d_udpsocket = NULL;
+        d_udpsocket.reset();
 
         d_io_service.reset();
         d_io_service.stop();
     }
 
-    if (d_localbuffer) {
-        delete[] d_localbuffer;
-        d_localbuffer = NULL;
-    }
-
-    if (d_localqueue) {
-        delete d_localqueue;
-        d_localqueue = NULL;
-    }
+    // TODO: Clarify whether we really need to re-allocate the circular buffer at every
+    // start()
+    d_localqueue.reset();
 
     return true;
 }
@@ -199,20 +178,23 @@ bool udp_sink_impl::stop()
 void udp_sink_impl::build_header()
 {
     switch (d_header_type) {
-    case HEADERTYPE_SEQNUM: {
+    case udp_headertype::SEQNUM: {
         d_seq_num++;
         header_seq_num seq_header;
         seq_header.seqnum = d_seq_num;
         memcpy((void*)d_tmpheaderbuff, (void*)&seq_header, d_header_size);
     } break;
 
-    case HEADERTYPE_SEQPLUSSIZE: {
+    case udp_headertype::SEQPLUSSIZE: {
         d_seq_num++;
         header_seq_plus_size seq_header_plus_size;
         seq_header_plus_size.seqnum = d_seq_num;
         seq_header_plus_size.length = d_payloadsize;
         memcpy((void*)d_tmpheaderbuff, (void*)&seq_header_plus_size, d_header_size);
     } break;
+    default: {
+        GR_LOG_WARN(d_logger, "encountered unexpected header type");
+    }
     }
 }
 
@@ -222,11 +204,11 @@ int udp_sink_impl::work(int noutput_items,
 {
     gr::thread::scoped_lock guard(d_setlock);
 
-    long num_bytes_to_transmit = noutput_items * d_block_size;
+    unsigned int num_bytes_to_transmit = noutput_items * d_block_size;
     const char* in = (const char*)input_items[0];
 
     // Build a long local queue to pull from so we can break it up easier
-    for (int i = 0; i < num_bytes_to_transmit; i++) {
+    for (unsigned int i = 0; i < num_bytes_to_transmit; i++) {
         d_localqueue->push_back(in[i]);
     }
 
@@ -234,15 +216,15 @@ int udp_sink_impl::work(int noutput_items,
     std::vector<boost::asio::const_buffer> transmitbuffer;
 
     // Let's see how many blocks are in the buffer
-    int bytes_available = d_localqueue->size();
-    long blocks_available = bytes_available / d_precomp_datasize;
+    auto bytes_available = d_localqueue->size();
+    auto blocks_available = bytes_available / d_precomp_datasize;
 
-    for (int cur_block = 0; cur_block < blocks_available; cur_block++) {
+    for (unsigned int cur_block = 0; cur_block < blocks_available; cur_block++) {
         // Clear the next transmit buffer
         transmitbuffer.clear();
 
         // build our next header if we need it
-        if (d_header_type != HEADERTYPE_NONE) {
+        if (d_header_type != udp_headertype::NONE) {
             build_header();
 
             transmitbuffer.push_back(
@@ -250,14 +232,14 @@ int udp_sink_impl::work(int noutput_items,
         }
 
         // Fill the data buffer
-        for (int i = 0; i < d_precomp_datasize; i++) {
-            d_localbuffer[i] = d_localqueue->at(0);
+        for (unsigned int i = 0; i < d_precomp_datasize; i++) {
+            d_local_buffer[i] = d_localqueue->at(0);
             d_localqueue->pop_front();
         }
 
         // Set up for transmit
         transmitbuffer.push_back(
-            boost::asio::buffer((const void*)d_localbuffer, d_precomp_datasize));
+            boost::asio::buffer((const void*)d_local_buffer.data(), d_precomp_datasize));
 
         // Send
         d_udpsocket->send_to(transmitbuffer, d_endpoint);

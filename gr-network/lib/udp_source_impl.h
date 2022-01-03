@@ -15,6 +15,8 @@
 #include <boost/asio.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/circular_buffer.hpp>
+#include <cstdint>
+#include <memory>
 
 #include <gnuradio/network/packet_headers.h>
 
@@ -23,40 +25,44 @@ namespace network {
 
 class NETWORK_API udp_source_impl : public udp_source
 {
+private:
+    static constexpr unsigned int UNDERRUN_EMISSION_COUNT = 100;
+    static constexpr unsigned int MAX_PARTIAL_FRAMES = 100;
+
 protected:
-    bool is_ipv6;
+    bool d_is_ipv6;
     size_t d_itemsize;
     size_t d_veclen;
-    int d_port;
+    uint16_t d_port;
 
     bool d_notify_missed;
     bool d_source_zeros;
-    int d_header_type;
+    udp_headertype d_header_type;
     uint16_t d_payloadsize;
 
     uint64_t d_seq_num;
-    int d_header_size;
-    int d_partial_frame_counter;
+    size_t d_header_size;
+    unsigned int d_partial_frame_counter;
 
-    int d_precomp_data_size;
-    int d_precomp_data_over_item_size;
-    size_t d_block_size;
+    unsigned int d_precomp_data_size;
+    unsigned int d_precomp_data_over_item_size;
+    unsigned int d_block_size;
 
-    char* d_local_buffer;
+    std::vector<char> d_local_buffer;
 
     boost::system::error_code ec;
 
     boost::asio::io_service d_io_service;
     boost::asio::ip::udp::endpoint d_endpoint;
-    boost::asio::ip::udp::socket* d_udpsocket;
+    std::unique_ptr<boost::asio::ip::udp::socket> d_udpsocket;
 
     boost::asio::streambuf d_read_buffer;
 
     // A queue is required because we have 2 different timing
     // domains: The network packets and the GR work()/scheduler
-    boost::circular_buffer<char>* d_localqueue;
+    std::unique_ptr<boost::circular_buffer<char>> d_localqueue;
 
-    uint64_t get_header_seqnum();
+    uint64_t get_header_seqnum() const;
 
 public:
     udp_source_impl(size_t itemsize,

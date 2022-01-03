@@ -11,10 +11,13 @@
 #ifndef NETWORK_UDPHEADERTYPES_H_
 #define NETWORK_UDPHEADERTYPES_H_
 
-constexpr int HEADERTYPE_NONE = 0;
-constexpr int HEADERTYPE_SEQNUM = 1;
-constexpr int HEADERTYPE_SEQPLUSSIZE = 2;
-// 3 and 4 were defined but have been removed.  ATA kept as 5 for backward compatibility.
-constexpr int HEADERTYPE_OLDATA = 5;
+enum class udp_headertype : int {
+    NONE = 0,
+    SEQNUM = 1,
+    SEQPLUSSIZE = 2,
+    // 3 and 4 were defined but have been removed.  ATA kept as 5 for backward
+    // compatibility.
+    OLDATA = 5
+};
 
 #endif /* NETWORK_UDPHEADERTYPES_H_ */

@@ -13,18 +13,14 @@
 
 #include <gnuradio/network/udp_header_types.h>
 
-class header_seq_num
-{
-public:
+struct header_seq_num {
     // size: 8 (64-bit)
     uint64_t seqnum;
 
     header_seq_num() { seqnum = 0; };
 };
 
-class header_seq_plus_size
-{
-public:
+struct header_seq_plus_size {
     // size: 10 (80-bit)
     uint64_t seqnum;
     int16_t length;
@@ -36,9 +32,7 @@ public:
     };
 };
 
-class ata_header
-{
-public:
+struct ata_header {
     // Total size: 64 bytes
     uint8_t group, version, bitsPerSample, binaryPoint;
     uint32_t order;
