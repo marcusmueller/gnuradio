@@ -45,7 +45,7 @@ public:
      *        and Gaussian distributions, this should be a negative
      *        number.
      */
-    static sptr make(noise_type_t type, float ampl, long seed = 0);
+    static sptr make(noise_type_t type, float ampl, uint64_t seed = 0);
 
     /*!
      * Set the noise type. Nominally from the
