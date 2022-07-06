@@ -1,5 +1,6 @@
 /*
  * Copyright 2020 Free Software Foundation, Inc.
+ * Copyright 2022 Marcus Müller
  *
  * This file is part of GNU Radio
  *
@@ -35,10 +36,18 @@ void bind_noise_source_template(py::module& m, const char* classname)
                gr::block,
                gr::basic_block,
                std::shared_ptr<noise_source>>(m, classname)
-        .def(py::init(&gr::analog::noise_source<T>::make),
+        .def(py::init([](gr::analog::noise_type_t type, float ampl, int64_t seed) {
+                 return gr::analog::noise_source<T>::make(type, ampl, seed);
+             }),
              py::arg("type"),
              py::arg("ampl"),
-             py::arg("seed") = 0)
+             py::arg("seed").noconvert(true) = 0)
+        .def(py::init([](gr::analog::noise_type_t type, float ampl, uint64_t seed) {
+                 return gr::analog::noise_source<T>::make(type, ampl, seed);
+             }),
+             py::arg("type"),
+             py::arg("ampl"),
+             py::arg("seed").noconvert(true) = 0)
 
         .def("set_type", &noise_source::set_type, py::arg("type"))
         .def("set_amplitude", &noise_source::set_amplitude, py::arg("ampl"))
