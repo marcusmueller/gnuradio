@@ -1,4 +1,4 @@
-"""Copyright 2021 The GNU Radio Contributors
+"""Copyright 2024 The GNU Radio Contributors
 This file is part of GNU Radio
 
 SPDX-License-Identifier: GPL-2.0-or-later
@@ -49,6 +49,10 @@ class Config(object):
         valid_paths = list(OrderedDict.fromkeys(valid_paths))
 
         return valid_paths
+
+    @property
+    def example_paths(self):
+        return [self._gr_prefs.get_string('grc', 'examples_path', '')]
 
     @property
     def default_flow_graph(self):

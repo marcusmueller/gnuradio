@@ -7,14 +7,17 @@
 
 from codecs import open
 from collections import namedtuple
+from collections import ChainMap
 import os
 import logging
 from itertools import chain
+from typing import Type
 
 from . import (
     Messages, Constants,
     blocks, params, ports, errors, utils, schema_checker
 )
+from .blocks import Block
 
 from .Config import Config
 from .cache import Cache
@@ -45,6 +48,7 @@ class Platform(Element):
 
         self.blocks = self.block_classes
         self.domains = {}
+        self.examples_dict = {}
         self.connection_templates = {}
         self.cpp_connection_templates = {}
         self.connection_params = {}
@@ -111,6 +115,9 @@ class Platform(Element):
             return None, None
 
         return flow_graph, generator.file_path
+
+    def build_example_library(self, path=None):
+        self.examples = list(self._iter_files_in_example_path())
 
     def build_library(self, path=None):
         """load the blocks and block tree from the search paths
@@ -418,7 +425,7 @@ class Platform(Element):
 
     block_classes_build_in = blocks.build_ins
     # separates build-in from loaded blocks)
-    block_classes = utils.backports.ChainMap({}, block_classes_build_in)
+    block_classes = ChainMap({}, block_classes_build_in)
 
     port_classes = {
         None: ports.Port,  # default
@@ -436,10 +443,10 @@ class Platform(Element):
             fg.import_data(data)
         return fg
 
-    def new_block_class(self, **data):
+    def new_block_class(self, **data) -> Type[Block]:
         return blocks.build(**data)
 
-    def make_block(self, parent, block_id, **kwargs):
+    def make_block(self, parent, block_id, **kwargs) -> Block:
         cls = self.block_classes[block_id]
         return cls(parent, **kwargs)
 

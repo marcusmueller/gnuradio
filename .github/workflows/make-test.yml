@@ -29,14 +29,17 @@ jobs:
     - uses: actions/checkout@v2
     - uses: quentinguidee/pep8-action@v1
       with:
+        # -----------------------------------
+        # UPDATE tox.ini when making changes!
         arguments: '--max-line-length=120 --ignore E265,E266,E275,E402,E501,E704,E712,E713,E714,E711,E721,E722,E741,W504,W605 --exclude *.yml.py'
+        # -----------------------------------
   # Doxygen gets built separately. It has a lot of output and its own weirdness.
   doxygen:
     name: Doxygen
     runs-on: ubuntu-latest # This can run on whatever
     timeout-minutes: 15
     container:
-      image: 'gnuradio/ci:ubuntu-20.04-3.9'
+      image: 'docker.io/gnuradio/ci:ubuntu-20.04-3.9'
       volumes:
         - build_data:/build
     steps:
@@ -48,8 +51,7 @@ jobs:
       run: 'cd /build && make doxygen_target'
   linux-docker:
   # All of these shall depend on the formatting check (needs: check-formatting)
-    needs: [check-formatting, check-python-formatting]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     # The GH default is 360 minutes (it's also the max as of Feb-2021). However
     # we should fail sooner. The only reason to exceed this time is if a test
     # hangs.
@@ -64,38 +66,43 @@ jobs:
         # container (i.e., what you want to docker-pull)
         include:
           - distro: 'Ubuntu 20.04'
-            containerid: 'gnuradio/ci:ubuntu-20.04-3.9'
+            containerid: 'docker.io/gnuradio/ci:ubuntu-20.04-3.9'
             cxxflags: -Werror
             ctest_args: '-E ""'
             # ldpath: 
           - distro: 'Ubuntu 22.04'
-            containerid: 'gnuradio/ci:ubuntu-22.04-3.9'
+            containerid: 'docker.io/gnuradio/ci:ubuntu-22.04-3.9'
             cxxflags: -Werror
             ctest_args: '-E "qa_polar_..coder_(sc_)?systematic"'
             # ldpath:
-          - distro: 'Fedora 37 (with 0xFE memory initialization)'
-            containerid: 'gnuradio/ci:fedora-37-3.9'
-            cxxflags: -Werror -ftrivial-auto-var-init=pattern
+          - distro: 'Fedora 38'
+            containerid: 'docker.io/gnuradio/ci:fedora-38-3.10'
+            cxxflags: -Werror
             ctest_args: '-E ""'
             ldpath: /usr/local/lib64/
-          - distro: 'Fedora 38 (clang)'
-            containerid: 'gnuradio/ci:fedora-38-3.10'
+          - distro: 'Fedora 39 (with 0xFE memory initialization, GLIBCXX_ASSERTIONS)'
+            containerid: 'docker.io/gnuradio/ci:fedora-39-3.10'
+            cxxflags: -Werror -ftrivial-auto-var-init=pattern -Wp,-D_GLIBCXX_ASSERTIONS
+            ctest_args: '-E ""'
+            ldpath: /usr/local/lib64/
+          - distro: 'Fedora 40 (clang)'
+            containerid: 'docker.io/gnuradio/ci:fedora-40-3.10'
             cxxflags: -Werror
             cmakeflags: -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
             ctest_args: '-E ""'
             ldpath: /usr/local/lib64 
           # - distro: 'CentOS 8.4'
-          #   containerid: 'gnuradio/ci:centos-8.4-3.10'
+          #   containerid: 'docker.io/gnuradio/ci:centos-8.4-3.10'
           #   cxxflags: ''
           #   ctest_args: '-E ""'
           #   ldpath: /usr/local/lib64/
           - distro: 'Debian 12'
-            containerid: 'gnuradio/ci:debian-12-3.10'
+            containerid: 'docker.io/gnuradio/ci:debian-12-3.10'
             cxxflags: -Werror
             ctest_args: '-E ""'
             # ldpath: 
           - distro: 'Debian 11 (32-bit)'
-            containerid: 'gnuradio/ci:debian-i386-11-3.10'
+            containerid: 'docker.io/gnuradio/ci:debian-i386-11-3.10'
             containeroptions: '--platform linux/i386'
             cxxflags: -Werror
             ctest_args: '-E "qa_polar_..coder_(sc_)?systematic"'
@@ -139,7 +146,7 @@ jobs:
     timeout-minutes: 120
     name: C++ Only Build (Ubuntu 20.04)
     container:
-      image: 'gnuradio/ci:ubuntu-20.04-3.9'
+      image: 'docker.io/gnuradio/ci:ubuntu-20.04-3.9'
       volumes:
         - build_data:/build
       options: --cpus 2

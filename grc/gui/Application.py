@@ -187,6 +187,7 @@ class Application(Gtk.Application):
                 Actions.TOGGLE_SHOW_PARAMETER_EXPRESSION,
                 Actions.TOGGLE_SHOW_PARAMETER_EVALUATION,
                 Actions.TOGGLE_SHOW_BLOCK_IDS,
+                Actions.TOGGLE_SHOW_FIELD_COLORS,
             ):
                 action.set_enabled(True)
                 if hasattr(action, 'load_from_preferences'):
@@ -524,6 +525,9 @@ class Application(Gtk.Application):
             Actions.NOTHING_SELECT()
             action.save_to_preferences()
             flow_graph_update()
+        elif action == Actions.TOGGLE_SHOW_FIELD_COLORS:
+            action.set_active(not action.get_active())
+            action.save_to_preferences()
         elif action == Actions.TOGGLE_FLOW_GRAPH_VAR_EDITOR:
             # TODO: There may be issues at startup since these aren't triggered
             # the same was as Gtk.Actions when loading preferences.
@@ -869,8 +873,8 @@ class Application(Gtk.Application):
 
         Actions.BLOCK_CREATE_HIER.set_enabled(bool(selected_blocks))
         Actions.OPEN_HIER.set_enabled(bool(selected_blocks))
-        Actions.BUSSIFY_SOURCES.set_enabled(bool(selected_blocks))
-        Actions.BUSSIFY_SINKS.set_enabled(bool(selected_blocks))
+        Actions.BUSSIFY_SOURCES.set_enabled(any(block.sources for block in selected_blocks))
+        Actions.BUSSIFY_SINKS.set_enabled(any(block.sinks for block in selected_blocks))
         Actions.RELOAD_BLOCKS.enable()
         Actions.FIND_BLOCKS.enable()
 
