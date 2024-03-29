@@ -51,8 +51,7 @@ jobs:
       run: 'cd /build && make doxygen_target'
   linux-docker:
   # All of these shall depend on the formatting check (needs: check-formatting)
-    needs: [check-formatting, check-python-formatting]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     # The GH default is 360 minutes (it's also the max as of Feb-2021). However
     # we should fail sooner. The only reason to exceed this time is if a test
     # hangs.
