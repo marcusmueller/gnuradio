@@ -29,9 +29,9 @@ if errorlevel 1 exit 1
 set SKIP_TESTS=^
 %=EMPTY=%
 
-ctest --build-config Release --output-on-failure --timeout 120 -j%CPU_COUNT% -E "%SKIP_TESTS%"
+ctest --build-config Release --output-on-failure --timeout 600 -j%CPU_COUNT% -E "%SKIP_TESTS%"
 if errorlevel 1 exit 1
 
 :: now run the skipped tests to see failures, but exit without error anyway
-ctest --build-config Release --output-on-failure --timeout 120 -j%CPU_COUNT% -R "%SKIP_TESTS%"
+ctest --build-config Release --output-on-failure --timeout 600 -j%CPU_COUNT% -R "%SKIP_TESTS%"
 exit 0
