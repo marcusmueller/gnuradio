@@ -50,7 +50,7 @@ class ModToolInfo(ModTool):
             if os.path.isdir(os.path.join('include', 'gnuradio', mod_info['modname'])):
                 self.info.version = '310'
         mod_info['version'] = self.info.version
-        if 'is_component' in list(self.info.keys()) and self.info.is_component:
+        if self.info.is_component is True:
             mod_info['is_component'] = True
         mod_info['incdirs'] = []
         mod_incl_dir = os.path.join(mod_info['base_dir'], 'include')
