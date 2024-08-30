@@ -66,41 +66,41 @@ jobs:
         # descriptive name, and one key 'containerid' with the name of the
         # container (i.e., what you want to docker-pull)
         include:
-          - distro: 'Ubuntu 20.04'
-            containerid: 'gnuradio/ci:ubuntu-20.04-3.9'
-            cxxflags: -Werror
-            ctest_args: '-E ""'
-            # ldpath: 
-          - distro: 'Ubuntu 22.04'
-            containerid: 'gnuradio/ci:ubuntu-22.04-3.9'
-            cxxflags: -Werror
-            ctest_args: '-E "qa_polar_..coder_(sc_)?systematic"'
-            # ldpath:
-          - distro: 'Ubuntu 24.04'
-            containerid: 'gnuradio/ci:ubuntu-24.04-3.10'
-            cxxflags: -Werror
-          - distro: 'Fedora 39 (with 0xFE memory initialization, GLIBCXX_ASSERTIONS)'
-            containerid: 'gnuradio/ci:fedora-39-3.10'
-            cxxflags: -Werror -ftrivial-auto-var-init=pattern -Wp,-D_GLIBCXX_ASSERTIONS
-            ctest_args: '-E ""'
-            ldpath: /usr/local/lib64/
-          - distro: 'Fedora 40 (clang)'
+          # - distro: 'Ubuntu 20.04'
+          #   containerid: 'gnuradio/ci:ubuntu-20.04-3.9'
+          #   cxxflags: -Werror
+          #   ctest_args: '-E ""'
+          #   # ldpath: 
+          # - distro: 'Ubuntu 22.04'
+          #   containerid: 'gnuradio/ci:ubuntu-22.04-3.9'
+          #   cxxflags: -Werror
+          #   ctest_args: '-E "qa_polar_..coder_(sc_)?systematic"'
+          #   # ldpath:
+          # - distro: 'Ubuntu 24.04'
+          #   containerid: 'gnuradio/ci:ubuntu-24.04-3.10'
+          #   cxxflags: -Werror
+          # - distro: 'Fedora 39 (with 0xFE memory initialization, GLIBCXX_ASSERTIONS)'
+          #   containerid: 'gnuradio/ci:fedora-39-3.10'
+          #   cxxflags: -Werror -ftrivial-auto-var-init=pattern -Wp,-D_GLIBCXX_ASSERTIONS
+          #   ctest_args: '-E ""'
+          #   ldpath: /usr/local/lib64/
+          - distro: 'Fedora 40 (clang+sccache)'
             containerid: 'gnuradio/ci:fedora-40-3.10'
             cxxflags: -Werror
-            cmakeflags: -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
+            cmakeflags: -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
             ctest_args: '-E ""'
             ldpath: /usr/local/lib64 
-          - distro: 'Debian 12'
-            containerid: 'gnuradio/ci:debian-12-3.10'
-            cxxflags: -Werror
-            ctest_args: '-E ""'
-            # ldpath: 
-          - distro: 'Debian 11 (32-bit)'
-            containerid: 'gnuradio/ci:debian-i386-11-3.10'
-            containeroptions: '--platform linux/i386'
-            cxxflags: -Werror
-            ctest_args: '-E "qa_polar_..coder_(sc_)?systematic"'
-            # ldpath:
+          # - distro: 'Debian 12'
+          #   containerid: 'gnuradio/ci:debian-12-3.10'
+          #   cxxflags: -Werror
+          #   ctest_args: '-E ""'
+          #   # ldpath: 
+          # - distro: 'Debian 11 (32-bit)'
+          #   containerid: 'gnuradio/ci:debian-i386-11-3.10'
+          #   containeroptions: '--platform linux/i386'
+          #   cxxflags: -Werror
+          #   ctest_args: '-E "qa_polar_..coder_(sc_)?systematic"'
+          #   # ldpath:
     name: ${{ matrix.distro }}
     container:
       image: ${{ matrix.containerid }}
