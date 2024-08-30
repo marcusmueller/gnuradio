@@ -66,41 +66,41 @@ jobs:
         # descriptive name, and one key 'containerid' with the name of the
         # container (i.e., what you want to docker-pull)
         include:
-          - distro: 'Ubuntu 20.04'
-            containerid: 'gnuradio/ci:ubuntu-20.04-3.9'
+          # - distro: 'Ubuntu 20.04'
+          #   containerid: 'gnuradio/ci:ubuntu-20.04-3.9'
+          #   cxxflags: -Werror
+          #   ctest_args: '-E ""'
+          #   # ldpath: 
+          # - distro: 'Ubuntu 22.04'
+          #   containerid: 'gnuradio/ci:ubuntu-22.04-3.9'
+          #   cxxflags: -Werror
+          #   ctest_args: '-E "qa_polar_..coder_(sc_)?systematic"'
+          #   # ldpath:
+          # - distro: 'Ubuntu 24.04'
+          #   containerid: 'gnuradio/ci:ubuntu-24.04-3.10'
+          #   cxxflags: -Werror
+          # - distro: 'Fedora 39 (with 0xFE memory initialization, GLIBCXX_ASSERTIONS)'
+          #   containerid: 'gnuradio/ci:fedora-39-3.10'
+          #   cxxflags: -Werror -ftrivial-auto-var-init=pattern -Wp,-D_GLIBCXX_ASSERTIONS
+          #   ctest_args: '-E ""'
+          #   ldpath: /usr/local/lib64/
+          - distro: 'Fedora 40 (clang+sccache)'
+            containerid: 'samplefirstasklater/ci:fedora-40-3.10'
             cxxflags: -Werror
-            ctest_args: '-E ""'
-            # ldpath: 
-          - distro: 'Ubuntu 22.04'
-            containerid: 'gnuradio/ci:ubuntu-22.04-3.9'
-            cxxflags: -Werror
-            ctest_args: '-E "qa_polar_..coder_(sc_)?systematic"'
-            # ldpath:
-          - distro: 'Ubuntu 24.04'
-            containerid: 'gnuradio/ci:ubuntu-24.04-3.10'
-            cxxflags: -Werror
-          - distro: 'Fedora 39 (with 0xFE memory initialization, GLIBCXX_ASSERTIONS)'
-            containerid: 'gnuradio/ci:fedora-39-3.10'
-            cxxflags: -Werror -ftrivial-auto-var-init=pattern -Wp,-D_GLIBCXX_ASSERTIONS
-            ctest_args: '-E ""'
-            ldpath: /usr/local/lib64/
-          - distro: 'Fedora 40 (clang)'
-            containerid: 'gnuradio/ci:fedora-40-3.10'
-            cxxflags: -Werror
-            cmakeflags: -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
+            cmakeflags: -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
             ctest_args: '-E ""'
             ldpath: /usr/local/lib64 
-          - distro: 'Debian 12'
-            containerid: 'gnuradio/ci:debian-12-3.10'
-            cxxflags: -Werror
-            ctest_args: '-E ""'
-            # ldpath: 
-          - distro: 'Debian 11 (32-bit)'
-            containerid: 'gnuradio/ci:debian-i386-11-3.10'
-            containeroptions: '--platform linux/i386'
-            cxxflags: -Werror
-            ctest_args: '-E "qa_polar_..coder_(sc_)?systematic"'
-            # ldpath:
+          # - distro: 'Debian 12'
+          #   containerid: 'gnuradio/ci:debian-12-3.10'
+          #   cxxflags: -Werror
+          #   ctest_args: '-E ""'
+          #   # ldpath: 
+          # - distro: 'Debian 11 (32-bit)'
+          #   containerid: 'gnuradio/ci:debian-i386-11-3.10'
+          #   containeroptions: '--platform linux/i386'
+          #   cxxflags: -Werror
+          #   ctest_args: '-E "qa_polar_..coder_(sc_)?systematic"'
+          #   # ldpath:
     name: ${{ matrix.distro }}
     container:
       image: ${{ matrix.containerid }}
@@ -110,9 +110,13 @@ jobs:
     steps:
     - uses: actions/checkout@v1
       name: Checkout Project
+    - name: insert AWS secrets into file
+      run: 'mkdir -p /root/.aws && printf "[default]\naws_access_key_id=${{ secrets.SCCACHE_S3_ACCESS_KEY_ID}}\naws_secret_access_key=${{ secrets.SCCACHE_S3_SECRET_ACCESS_KEY }}\n" > /root/.aws/credentials'
     - name: CMake
       env:
         CXXFLAGS: ${{ matrix.cxxflags }}
+        SCCACHE_BUCKET: sccache
+        SCCACHE_ENDPOINT: s3.us-west-002.backblazeb2.com
       run: 'cd /build && cmake ${{ matrix.cmakeflags }} ${GITHUB_WORKSPACE} -DENABLE_DOXYGEN=OFF'
     - name: Dump compile commands
       run: 'cd /build && cat compile_commands.json'
