@@ -110,13 +110,13 @@ jobs:
     steps:
     - uses: actions/checkout@v1
       name: Checkout Project
+    - name: insert AWS secrets into file
+      run: 'mkdir -p /root/.aws && printf "[default]\naws_access_key_id=${{ secrets.SCCACHE_S3_ACCESS_KEY_ID}}\naws_secret_access_key=${{ secrets.SCCACHE_S3_SECRET_ACCESS_KEY }}\n" > /root/.aws/credentials'
     - name: CMake
       env:
         CXXFLAGS: ${{ matrix.cxxflags }}
         SCCACHE_BUCKET: sccache
         SCCACHE_ENDPOINT: s3.us-west-002.backblazeb2.com
-        AWS_ACCESS_KEY_ID: ${{ secrets.SCCACHE_S3_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.SCCACHE_S3_SECRET_ACCESS_KEY }}
       run: 'cd /build && cmake ${{ matrix.cmakeflags }} ${GITHUB_WORKSPACE} -DENABLE_DOXYGEN=OFF'
     - name: Dump compile commands
       run: 'cd /build && cat compile_commands.json'
