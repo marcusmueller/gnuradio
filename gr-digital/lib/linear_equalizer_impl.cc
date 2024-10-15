@@ -20,7 +20,6 @@
 
 #include "adaptive_algorithms.h"
 
-using namespace pmt;
 using namespace std;
 
 namespace gr {
