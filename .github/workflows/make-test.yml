@@ -87,9 +87,10 @@ jobs:
           - distro: 'Fedora 40 (clang)'
             containerid: 'gnuradio/ci:fedora-40-3.10'
             cxxflags: -Werror
-            cmakeflags: -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
+            cmakeflags: -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
             ctest_args: '-E ""'
             ldpath: /usr/local/lib64 
+            run_clang_tidy: true
           - distro: 'Debian 12'
             containerid: 'gnuradio/ci:debian-12-3.10'
             cxxflags: -Werror
@@ -118,6 +119,17 @@ jobs:
       run: 'cd /build && cat compile_commands.json'
     - name: Make
       run: 'cd /build && make -j2 -k'
+    - name: clang-tidy of changed files
+      if: ${{ matrix.run_clang_tidy }}
+      run: >
+           cd ${GITHUB_WORKSPACE} 
+           && git diff -z --name-only ${GITHUB_BASE_REF}..${GITHUB_HEAD_REF} 
+           | grep -z -E '\.(h|hpp|cpp|cc)$'
+           | xargs -0 clang-tidy -p /build --quiet
+           > /tmp/clang-tidy.log 
+           ; echo "::group::clang-tidy output"
+           ; sed -n 's;^\([^:]*\):\([0-9]*\):\([0-9]*\): \(.*\)$;::error file=\1,line=\2,col=\3::\4;p'  /tmp/clang-tidy.log
+           ; echo "::endgroup::"
     - name: Make Test
       env:
         QT_QPA_PLATFORM: offscreen
