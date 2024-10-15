@@ -15,6 +15,7 @@
 #include <gnuradio/logger.h>
 #include <boost/test/unit_test.hpp>
 #include <memory>
+using namespace  std;
 
 BOOST_AUTO_TEST_CASE(t1)
 {
