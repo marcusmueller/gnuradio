@@ -496,10 +496,9 @@ endpoint_vector_t hier_block2_detail::resolve_port(int port, bool is_input)
     return result;
 }
 
-void hier_block2_detail::recursive_disconnect_all(hier_block2_sptr caller)
+void hier_block2_detail::recursive_disconnect_all(hier_block2* caller)
 {
-    auto parent = this->d_parent.lock();
-    if (parent != caller) {
+    if (this->d_owner != caller) {
         d_debug_logger->debug("Disconnect hier_block2 recursive...");
         for (auto& path : d_fg->partition()) {
             for (auto block_pointer : path) {
@@ -513,7 +512,7 @@ void hier_block2_detail::recursive_disconnect_all(hier_block2_sptr caller)
 void hier_block2_detail::disconnect_all()
 {
     d_debug_logger->debug("Disconnect all...");
-    recursive_disconnect_all(this->d_parent.lock());
+    recursive_disconnect_all(this->d_owner);
     reset_hier_blocks_parent();
     d_fg->clear();
     d_blocks.clear();
