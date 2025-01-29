@@ -502,7 +502,8 @@ void hier_block2_detail::recursive_disconnect_all(hier_block2* caller)
         d_debug_logger->debug("Disconnect hier_block2 recursive...");
         for (auto& path : d_fg->partition()) {
             for (auto block_pointer : path) {
-                disconnect_all();
+                auto hier_pointer = std::dynamic_pointer_cast<hier_block2>(block_pointer);
+                if(hier_pointer) disconnect_all();
             }
         }
         d_debug_logger->debug("Disconnect hier_block2 recursive...finished");
